@@ -293,14 +293,49 @@ void CprintscreenDlg::CreateRun()
 		CString   fullName;   
 		fullName=lpszFile;   
 		RegKey=NULL;   
-		RegOpenKey(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\Run",&RegKey);   
+		///////////////////////////
+		// 打开注册表 失败退出
+		int iRegipen=RegOpenKey(HKEY_LOCAL_MACHINE,"Software\\Microsoft\\Windows\\CurrentVersion\\Run",&RegKey);
+		if (iRegipen!=ERROR_SUCCESS)
+		{
+			AfxMessageBox("注册表打开失败,启动项添加失败");
+			return ;
+		}
+		////////
+		//判断键项目存在 则判断启动项字符串和程序路径是否一致 不一致添加启动项 一致退出
+		LPBYTE owner_Get=new BYTE[80];
+		DWORD type_1=REG_SZ;
+		DWORD cbData_1=80;
+		int ret1=::RegQueryValueEx(RegKey,"printscreen",NULL,&type_1,owner_Get,&cbData_1);
+		if(ret1!=ERROR_SUCCESS)
+		{
+			AfxMessageBox("查询的键不存在！");
+		
+
 		RegSetValueEx(RegKey,"printscreen",0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
 		this->UpdateData(FALSE);   
+		}
+		else
+		{
+			CString cstr_get;
+			cstr_get=owner_Get;
+			if (cstr_get==fullName)
+			{
+				return ;
+			}
+			else
+			{
+				RegSetValueEx(RegKey,"printscreen",0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
+				this->UpdateData(FALSE);  
+
+			}
+		}
+	
 	}   
 	else   
 	{   
 		//theApp.SetMainSkin();   
-		::AfxMessageBox("没找到执行程序，自动运行失败");   
+		::AfxMessageBox("没找到执行程序，启动项加载失败");   
 		exit(0);   
 	}   
 	return ;
