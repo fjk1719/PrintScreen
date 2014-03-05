@@ -301,7 +301,7 @@ void CprintscreenDlg::CreateRun()
 			AfxMessageBox("注册表打开失败,启动项添加失败");
 			return ;
 		}
-		////////
+		/////////////////////////////
 		//判断键项目存在 则判断启动项字符串和程序路径是否一致 不一致添加启动项 一致退出
 		LPBYTE owner_Get=new BYTE[80];
 		DWORD type_1=REG_SZ;
@@ -310,8 +310,6 @@ void CprintscreenDlg::CreateRun()
 		if(ret1!=ERROR_SUCCESS)
 		{
 			AfxMessageBox("查询的键不存在！");
-		
-
 		RegSetValueEx(RegKey,"printscreen",0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
 		this->UpdateData(FALSE);   
 		}
@@ -319,15 +317,10 @@ void CprintscreenDlg::CreateRun()
 		{
 			CString cstr_get;
 			cstr_get=owner_Get;
-			if (cstr_get==fullName)
-			{
-				return ;
-			}
-			else
+			if (cstr_get!=fullName)
 			{
 				RegSetValueEx(RegKey,"printscreen",0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
 				this->UpdateData(FALSE);  
-
 			}
 		}
 	
@@ -336,8 +329,10 @@ void CprintscreenDlg::CreateRun()
 	{   
 		//theApp.SetMainSkin();   
 		::AfxMessageBox("没找到执行程序，启动项加载失败");   
-		exit(0);   
+		return;   
 	}   
+	RegCloseKey(RegKey);
+	
 	return ;
 
 
