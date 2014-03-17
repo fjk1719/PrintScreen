@@ -278,20 +278,20 @@ void CprintscreenDlg::CreateRun()
 {
 	HKEY   RegKey;   
 	CString   sPath;   
+	CString fileName;
 	GetModuleFileName(NULL,sPath.GetBufferSetLength(MAX_PATH+1),MAX_PATH);   
 	sPath.ReleaseBuffer();   
-	int   nPos;   
-	nPos=sPath.ReverseFind('\\');   
-		sPath=sPath.Left(nPos);   
-	CString   lpszFile=sPath+"\\printscreen.exe";//这里加上你要查找的执行文件名称   
+	// 获取文件名字
+	fileName=sPath.Right(sPath.GetLength()-sPath.ReverseFind('\\')-1);
+	fileName=fileName.Left(fileName.ReverseFind('.'));
 	CFileFind   fFind;   
 	BOOL   bSuccess;   
-	bSuccess=fFind.FindFile(lpszFile);   
+	bSuccess=fFind.FindFile(sPath);   
 	fFind.Close();   
 	if(bSuccess)   
 	{   
 		CString   fullName;   
-		fullName=lpszFile;   
+		fullName=sPath;   
 		RegKey=NULL;   
 		///////////////////////////
 		// 打开注册表 失败退出
@@ -306,11 +306,11 @@ void CprintscreenDlg::CreateRun()
 		LPBYTE owner_Get=new BYTE[80];
 		DWORD type_1=REG_SZ;
 		DWORD cbData_1=80;
-		int ret1=::RegQueryValueEx(RegKey,"printscreen",NULL,&type_1,owner_Get,&cbData_1);
+		int ret1=::RegQueryValueEx(RegKey,fileName,NULL,&type_1,owner_Get,&cbData_1);
 		if(ret1!=ERROR_SUCCESS)
 		{
 			AfxMessageBox("查询的键不存在！");
-		RegSetValueEx(RegKey,"printscreen",0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
+		RegSetValueEx(RegKey,fileName,0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
 		this->UpdateData(FALSE);   
 		}
 		else
@@ -319,7 +319,7 @@ void CprintscreenDlg::CreateRun()
 			cstr_get=owner_Get;
 			if (cstr_get!=fullName)
 			{
-				RegSetValueEx(RegKey,"printscreen",0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
+				RegSetValueEx(RegKey,fileName,0,REG_SZ,(const   unsigned   char*)(LPCTSTR)fullName,fullName.GetLength());//这里加上你需要在注册表中注册的内容   
 				this->UpdateData(FALSE);  
 			}
 		}
